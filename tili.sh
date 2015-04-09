@@ -9,6 +9,7 @@ OUT_DIR=
 CROP_WIDTH=256
 CROP_HEIGHT=256
 CONVERT=convert
+RESIZE_PERCENTAGE=100
 
 error()
 {
@@ -17,8 +18,8 @@ error()
 
 usage()
 {
-  error $SELF -f IMAGE_FILE_PATH -d OUTPUT_DIR [-x CROP_WIDTH] [-y CROP_HEIGHT] [-p OUTPUT_PREFIX]
-  exit 1
+  error $SELF -f IMAGE_FILE_PATH -d OUTPUT_DIR [-x CROP_WIDTH] [-y CROP_HEIGHT] [-p OUTPUT_PREFIX] [-r RESIZE_PERCENTAGE]
+  Exit 1
 }
 
 is_integer()
@@ -26,7 +27,7 @@ is_integer()
   [[ "$1" =~ ^[0-9]+$ ]]
 }
 
-while getopts "x:y:f:p:d:h" FLAG; do
+while getopts "x:y:f:p:d:r:h" FLAG; do
   case $FLAG in
     x)
       CROP_WIDTH=$OPTARG
@@ -44,6 +45,10 @@ while getopts "x:y:f:p:d:h" FLAG; do
       ;;
     d)
       OUT_DIR=$OPTARG
+      ;;
+    r)
+      RESIZE_PERCENTAGE=$OPTARG
+      is_integer $RESIZE_PERCENTAGE || usage
       ;;
     h)
       usage
@@ -73,4 +78,4 @@ fi
 
 OUT_SUFFIX=${IMG_PATH##*.}
 
-$CONVERT $IMG_PATH -crop $CROP_DIM -set filename:tile "%[fx:page.x/${CROP_WIDTH}]_%[fx:page.y/${CROP_HEIGHT}]" +repage +adjoin "${OUT_DIR}${OUT_PREFIX}%[filename:tile].${OUT_SUFFIX}"
+$CONVERT $IMG_PATH -resize ${RESIZE_PERCENTAGE}% -crop $CROP_DIM -set filename:tile "%[fx:page.x/${CROP_WIDTH}]_%[fx:page.y/${CROP_HEIGHT}]" +repage +adjoin "${OUT_DIR}${OUT_PREFIX}%[filename:tile].${OUT_SUFFIX}"
